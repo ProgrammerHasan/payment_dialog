@@ -184,16 +184,10 @@ class _ErrorWidget extends StatelessWidget {
 // ----------------- Close Button -----------------
 class _ConfirmationCloseButton extends StatelessWidget {
   const _ConfirmationCloseButton({
-    this.shouldShowConfirmation,
     this.goBack,
-    this.icon,
-    this.iconWidget,
   });
 
-  final bool Function()? shouldShowConfirmation;
   final VoidCallback? goBack;
-  final IconData? icon;
-  final Widget? iconWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +196,7 @@ class _ConfirmationCloseButton extends StatelessWidget {
         if (goBack != null) goBack!();
         Navigator.of(context).pop();
       },
-      icon: iconWidget ?? Icon(icon ?? Icons.close, color: Colors.white),
+      icon: const Icon(Icons.close, color: Colors.white),
     );
   }
 }

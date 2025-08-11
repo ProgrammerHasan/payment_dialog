@@ -6,10 +6,10 @@
 </p>
 
 <p align="center">
-  <img src="https://github.com/programmerhasan/payment_dialog/raw/master/screenshots/01.png" alt="Payment dialog for Flutter" width="100" style="border-radius: 50%;" />
-  <img src="https://github.com/programmerhasan/payment_dialog/raw/master/screenshots/02.png" alt="Payment dialog for Flutter" width="100" style="border-radius: 50%;" />
-  <img src="https://github.com/programmerhasan/payment_dialog/raw/master/screenshots/03.png" alt="Payment dialog for Flutter" width="100" style="border-radius: 50%;" />
-  <img src="https://github.com/programmerhasan/payment_dialog/raw/master/screenshots/04.png" alt="Payment dialog for Flutter" width="100" style="border-radius: 50%;" />
+  <img src="https://github.com/programmerhasan/payment_dialog/raw/master/screenshots/01.png" alt="Payment dialog for Flutter" width="120" style="border-radius: 50%;" />
+  <img src="https://github.com/programmerhasan/payment_dialog/raw/master/screenshots/02.png" alt="Payment dialog for Flutter" width="120" style="border-radius: 50%;" />
+  <img src="https://github.com/programmerhasan/payment_dialog/raw/master/screenshots/03.png" alt="Payment dialog for Flutter" width="120" style="border-radius: 50%;" />
+  <img src="https://github.com/programmerhasan/payment_dialog/raw/master/screenshots/04.png" alt="Payment dialog for Flutter" width="120" style="border-radius: 50%;" />
 </p>
 
 

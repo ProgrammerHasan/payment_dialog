@@ -1,6 +1,6 @@
 name: payment_dialog
 description: A customizable Flutter payment dialog with WebView for handling online payments.
-version: 1.0.3
+version: 1.0.4
 homepage: https://github.com/programmerhasan/payment_dialog
 repository: https://github.com/programmerhasan/payment_dialog
 issue_tracker: https://github.com/programmerhasan/payment_dialog/issues

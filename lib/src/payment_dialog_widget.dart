@@ -211,9 +211,9 @@ class _ErrorWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(
-                  width: 150,
-                  height: 150,
-                  child: CircularProgressIndicator(),
+                    height: 35,
+                    width: 35,
+                    child: CircularProgressIndicator()
                 ),
                 Text("Please wait, Loading the payment gateway..."),
               ],
@@ -425,23 +425,26 @@ Future<bool> showPaymentDialog({
       serverError: serverError,
       onSuccessful: () {
         MotionToast.success(
-          title: Text(successMsgTitle ?? "Payment Success"),
-          description: Text(successMsgDescription ?? "Your payment was completed."),
+          title: Text(successMsgTitle ?? "Payment Success", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+          description: Text(successMsgDescription ?? "Your payment has been successfully completed.", style: TextStyle(color: Colors.white)),
+          toastDuration: const Duration(seconds: 10),
         ).show(context);
         isPaid?.value = true;
         completer.complete(true);
       },
       onFailed: () {
         MotionToast.error(
-          title: Text(failedMsgTitle ?? "Payment Failed"),
-          description: Text(failedMsgDescription ?? "Your payment failed, please try again."),
+          title: Text(failedMsgTitle ?? "Payment Failed", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+          description: Text(failedMsgDescription ?? "Your payment has been failed, Please try again.", style: TextStyle(color: Colors.white)),
+          toastDuration: const Duration(seconds: 10),
         ).show(context);
         completer.complete(false);
       },
       onCancelled: () {
         MotionToast.info(
-          title: Text(errorMsgTitle ?? "Cancelled"),
-          description: Text(errorMsgDescription ?? "Payment was cancelled."),
+          title: Text(errorMsgTitle ?? "Oops! Cancelled.", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+          description: Text(errorMsgDescription ?? "Your payment has been cancelled, Please try again.", style: TextStyle(color: Colors.white)),
+          toastDuration: const Duration(seconds: 10),
         ).show(context);
         completer.complete(false);
       },

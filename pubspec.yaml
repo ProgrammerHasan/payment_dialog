@@ -16,8 +16,8 @@ platforms:
 
 topics:
   - payment
-  - online payment gateways
-  - customizable dialog
+  - online-payment-gateways
+  - customizable-dialog
 
 screenshots:
   - description: "Payment Dialog Logo"

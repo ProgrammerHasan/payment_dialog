@@ -276,40 +276,22 @@ class _ErrorWidget extends StatelessWidget {
 // ----------------- Close Button -----------------
 class _ConfirmationCloseButton extends StatelessWidget {
   const _ConfirmationCloseButton({
-    this.shouldShowConfirmation,
     this.goBack,
-    this.icon,
-    this.iconWidget,
   });
 
-  final bool Function()? shouldShowConfirmation;
   final VoidCallback? goBack;
-  final IconData? icon;
-  final Widget? iconWidget;
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
-        if (shouldShowConfirmation?.call() == false) {
-          return Future.value(true);
-        }
         return showConfirmPrompt(context, goBack);
       },
       child: IconButton(
         onPressed: () {
-          if (shouldShowConfirmation?.call() == false) {
-            if (goBack != null) {
-              goBack!();
-            } else if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            }
-            return;
-          }
           showConfirmPrompt(context, goBack);
         },
-        icon: iconWidget ?? Icon(
-          icon ?? Icons.close,
+        icon: Icon(Icons.close,
           color: Colors.white,
         ),
       ),
@@ -384,10 +366,10 @@ class _ConfirmationCloseButton extends StatelessWidget {
                           }
                         },
                         style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
+                          backgroundColor: WidgetStateProperty.all(
                             Colors.red.withOpacity(0.2),
                           ),
-                          foregroundColor: MaterialStateProperty.all(
+                          foregroundColor: WidgetStateProperty.all(
                             Colors.red,
                           ),
                         ),

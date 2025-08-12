@@ -1,4 +1,4 @@
-## 1.0.4
+## 1.0.5
 - Initial release 🎉
 - Added customizable payment dialog.
 - Added support for multiple payment methods.

@@ -211,14 +211,6 @@ class _ErrorWidget extends StatelessWidget {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: backgroundColor ?? Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
             ),
             alignment: Alignment.center,
             child: Column(
@@ -226,7 +218,7 @@ class _ErrorWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset('assets/payment_loading.gif', height: 120),
+                Image.asset('packages/payment_dialog/assets/payment_loading.gif', height: 120),
                 const SizedBox(height: 4),
                 Text(
                   "Please wait...",

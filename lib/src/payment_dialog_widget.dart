@@ -70,7 +70,6 @@ class _PaymentDialog extends StatelessWidget {
 // ----------------- WebView -----------------
 class _WebView extends StatefulWidget {
   const _WebView({
-    super.key,
     required this.paymentUrl,
     required this.succeededUrl,
     required this.failedUrl,
@@ -195,7 +194,7 @@ class _ErrorWidget extends StatelessWidget {
   final Widget? error;
   final Widget? serverError;
 
-  const _ErrorWidget({super.key, required this.state, this.loading, this.error, this.serverError});
+  const _ErrorWidget({required this.state, this.loading, this.error, this.serverError});
 
   @override
   Widget build(BuildContext context) {
@@ -277,7 +276,6 @@ class _ErrorWidget extends StatelessWidget {
 // ----------------- Close Button -----------------
 class _ConfirmationCloseButton extends StatelessWidget {
   const _ConfirmationCloseButton({
-    super.key,
     this.shouldShowConfirmation,
     this.goBack,
     this.icon,
@@ -362,10 +360,10 @@ class _ConfirmationCloseButton extends StatelessWidget {
                           Navigator.of(context).pop();
                         },
                         style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
+                          backgroundColor: WidgetStateProperty.all(
                             Colors.black12.withOpacity(0.1),
                           ),
-                          foregroundColor: MaterialStateProperty.all(
+                          foregroundColor: WidgetStateProperty.all(
                             Colors.black54,
                           ),
                         ),

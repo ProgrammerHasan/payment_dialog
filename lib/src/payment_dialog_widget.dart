@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:collection';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:motion_toast/motion_toast.dart';
-import 'package:rxdart/rxdart.dart';
 
 enum _LoadingState { loading, loaded, error, serverError }
 
@@ -70,8 +68,9 @@ class _PaymentDialog extends StatelessWidget {
 }
 
 // ----------------- WebView -----------------
-class _WebView extends HookWidget {
+class _WebView extends StatefulWidget {
   const _WebView({
+    super.key,
     required this.paymentUrl,
     required this.succeededUrl,
     required this.failedUrl,
@@ -96,59 +95,92 @@ class _WebView extends HookWidget {
   final VoidCallback? onCancelled;
 
   @override
-  Widget build(BuildContext context) {
-    List<String> kInternalUrls = [succeededUrl, failedUrl, cancelledUrl];
+  State<_WebView> createState() => _WebViewState();
+}
 
-    final loadingStreamController = useStreamController<_LoadingState>();
-    final loadingStateStream = useMemoized(() {
-      return loadingStreamController.stream.debounceTime(const Duration(seconds: 1));
-    }, [loadingStreamController]);
+class _WebViewState extends State<_WebView> {
+  late final StreamController<_LoadingState> _rawStreamController;
+  late final StreamController<_LoadingState> _debouncedStreamController;
+  Timer? _debounceTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _rawStreamController = StreamController<_LoadingState>.broadcast();
+    _debouncedStreamController = StreamController<_LoadingState>.broadcast();
+
+    // Listen to raw events and apply manual debounce
+    _rawStreamController.stream.listen((event) {
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(const Duration(seconds: 1), () {
+        if (!_debouncedStreamController.isClosed) {
+          _debouncedStreamController.add(event);
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _rawStreamController.close();
+    _debouncedStreamController.close();
+    super.dispose();
+  }
+
+  void _emitLoadingState(_LoadingState state) {
+    if (!_rawStreamController.isClosed) {
+      _rawStreamController.add(state);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<String> internalUrls = [widget.succeededUrl, widget.failedUrl, widget.cancelledUrl];
     return Stack(
       alignment: Alignment.center,
       children: [
         InAppWebView(
           initialUrlRequest: URLRequest(
-            url: WebUri(paymentUrl),
+            url: WebUri(widget.paymentUrl),
           ),
           initialSettings: InAppWebViewSettings(
             useShouldOverrideUrlLoading: true,
-            builtInZoomControls: true
           ),
-          initialUserScripts: UnmodifiableListView<UserScript>([]),
           shouldOverrideUrlLoading: (controller, navigationAction) async {
             final url = navigationAction.request.url.toString();
-            if (kInternalUrls.contains(url)) {
+            if (internalUrls.contains(url)) {
               Navigator.of(context).pop();
-              if (url == succeededUrl) {
-                onSuccessful?.call();
-              } else if (url == failedUrl) {
-                onFailed?.call();
-              } else if (url == cancelledUrl) {
-                onCancelled?.call();
+              if (url == widget.succeededUrl) {
+                widget.onSuccessful?.call();
+              } else if (url == widget.failedUrl) {
+                widget.onFailed?.call();
+              } else if (url == widget.cancelledUrl) {
+                widget.onCancelled?.call();
               }
               return NavigationActionPolicy.CANCEL;
             }
             return NavigationActionPolicy.ALLOW;
           },
           onLoadStart: (controller, url) {
-            loadingStreamController.add(_LoadingState.loading);
+            _emitLoadingState(_LoadingState.loading);
           },
           onLoadStop: (controller, url) async {
-            loadingStreamController.add(_LoadingState.loaded);
+            _emitLoadingState(_LoadingState.loaded);
           },
           onLoadError: (controller, url, code, message) {
-            loadingStreamController.add(_LoadingState.error);
+            _emitLoadingState(_LoadingState.error);
           },
           onLoadHttpError: (controller, url, code, message) {
-            loadingStreamController.add(_LoadingState.serverError);
+            _emitLoadingState(_LoadingState.serverError);
           },
         ),
-        StreamBuilder(
-          stream: loadingStateStream,
+        StreamBuilder<_LoadingState>(
+          stream: _debouncedStreamController.stream,
           initialData: _LoadingState.loading,
-          builder: (context, AsyncSnapshot<_LoadingState> snapshot) {
+          builder: (context, snapshot) {
             final state = snapshot.data ?? _LoadingState.loading;
-            return _ErrorWidget(state: state, loading: loading, error: error, serverError: serverError);
+            return _ErrorWidget(state: state, loading: widget.loading, error: widget.error, serverError: widget.serverError);
           },
         ),
       ],
@@ -163,19 +195,81 @@ class _ErrorWidget extends StatelessWidget {
   final Widget? error;
   final Widget? serverError;
 
-  const _ErrorWidget({required this.state, this.loading, this.error, this.serverError});
+  const _ErrorWidget({super.key, required this.state, this.loading, this.error, this.serverError});
 
   @override
   Widget build(BuildContext context) {
     switch (state) {
       case _LoadingState.loading:
-        return loading ?? const Center(child: CircularProgressIndicator());
+        return SizedBox.expand(
+          child: loading ?? Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+            ),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 150,
+                  height: 150,
+                  child: CircularProgressIndicator(),
+                ),
+                Text("Please wait, Loading the payment gateway..."),
+              ],
+            ),
+          ),
+        );
       case _LoadingState.loaded:
         return const SizedBox.shrink();
       case _LoadingState.error:
-        return error ?? const Center(child: Text("Please check your internet connection!"));
+        return SizedBox.expand(
+          child: error ?? Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+            ),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.wifi_off,
+                  size: 60,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Please check your internet connection!',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ],
+            ),
+          ),
+        );
       case _LoadingState.serverError:
-        return serverError ?? const Center(child: Text("Service temporarily unavailable"));
+        return SizedBox.expand(
+          child: serverError ?? Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 60,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Temporarily Service Unavailable",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+          ),
+        );
     }
   }
 }
@@ -183,20 +277,134 @@ class _ErrorWidget extends StatelessWidget {
 // ----------------- Close Button -----------------
 class _ConfirmationCloseButton extends StatelessWidget {
   const _ConfirmationCloseButton({
+    super.key,
+    this.shouldShowConfirmation,
     this.goBack,
+    this.icon,
+    this.iconWidget,
   });
 
+  final bool Function()? shouldShowConfirmation;
   final VoidCallback? goBack;
+  final IconData? icon;
+  final Widget? iconWidget;
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        if (goBack != null) goBack!();
-        Navigator.of(context).pop();
+    return WillPopScope(
+      onWillPop: () {
+        if (shouldShowConfirmation?.call() == false) {
+          return Future.value(true);
+        }
+        return showConfirmPrompt(context, goBack);
       },
-      icon: const Icon(Icons.close, color: Colors.white),
+      child: IconButton(
+        onPressed: () {
+          if (shouldShowConfirmation?.call() == false) {
+            if (goBack != null) {
+              goBack!();
+            } else if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+            return;
+          }
+          showConfirmPrompt(context, goBack);
+        },
+        icon: iconWidget ?? Icon(
+          icon ?? Icons.close,
+          color: Colors.white,
+        ),
+      ),
     );
+  }
+
+  Future<bool> showConfirmPrompt(BuildContext context, VoidCallback? goBack) {
+    final completer = Completer<bool>();
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(8),
+        ),
+      ),
+      builder: (context) {
+        return IntrinsicHeight(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              children: [
+                Text(
+                  "Are you sure to cancel?",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 20
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "If you change your mind, you’ll need to put them back in.",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            Colors.black12.withOpacity(0.1),
+                          ),
+                          foregroundColor: MaterialStateProperty.all(
+                            Colors.black54,
+                          ),
+                        ),
+                        child: Text(
+                          "Cancel",
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 32),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          if (goBack != null) {
+                            goBack();
+                          } else if (Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            Colors.red.withOpacity(0.2),
+                          ),
+                          foregroundColor: MaterialStateProperty.all(
+                            Colors.red,
+                          ),
+                        ),
+                        child: Text("Confirm", style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    return completer.future;
   }
 }
 

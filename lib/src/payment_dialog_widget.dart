@@ -110,10 +110,9 @@ class _WebView extends HookWidget {
           initialUrlRequest: URLRequest(
             url: WebUri(paymentUrl),
           ),
-          initialOptions: InAppWebViewGroupOptions(
-            crossPlatform: InAppWebViewOptions(
-              useShouldOverrideUrlLoading: true,
-            ),
+          initialSettings: InAppWebViewSettings(
+            useShouldOverrideUrlLoading: true,
+            builtInZoomControls: true
           ),
           initialUserScripts: UnmodifiableListView<UserScript>([]),
           shouldOverrideUrlLoading: (controller, navigationAction) async {

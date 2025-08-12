@@ -3,6 +3,25 @@ description: A customizable Flutter payment dialog with WebView for handling onl
 version: 1.0.0
 homepage: https://github.com/programmerhasan/payment_dialog
 repository: https://github.com/programmerhasan/payment_dialog
+issue_tracker: https://github.com/programmerhasan/payment_dialog/issues
+documentation: https://pub.dev/packages/payment_dialog
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
+topics:
+  - payment
+  - online payment gateways
+  - customizable dialog
+
+screenshots:
+  - description: "Payment Dialog Logo"
+    path: screenshots/01.png
 
 environment:
   sdk: ">=2.18.0 <4.0.0"

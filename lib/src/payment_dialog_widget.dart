@@ -15,6 +15,7 @@ class _PaymentDialog extends StatelessWidget {
     required this.cancelledUrl,
     this.title,
     this.appBarBackgroundColor,
+    this.backgroundColor,
     this.loading,
     this.error,
     this.serverError,
@@ -29,6 +30,7 @@ class _PaymentDialog extends StatelessWidget {
   final String cancelledUrl;
   final Widget? title;
   final Color? appBarBackgroundColor;
+  final Color? backgroundColor;
   final Widget? loading;
   final Widget? error;
   final Widget? serverError;
@@ -58,6 +60,7 @@ class _PaymentDialog extends StatelessWidget {
           loading: loading,
           error: error,
           serverError: serverError,
+          backgroundColor: backgroundColor,
           onSuccessful: onSuccessful,
           onFailed: onFailed,
           onCancelled: onCancelled,
@@ -77,6 +80,7 @@ class _WebView extends StatefulWidget {
     this.loading,
     this.error,
     this.serverError,
+    this.backgroundColor,
     this.onSuccessful,
     this.onFailed,
     this.onCancelled,
@@ -89,6 +93,7 @@ class _WebView extends StatefulWidget {
   final Widget? loading;
   final Widget? error;
   final Widget? serverError;
+  final Color? backgroundColor;
   final VoidCallback? onSuccessful;
   final VoidCallback? onFailed;
   final VoidCallback? onCancelled;
@@ -179,7 +184,7 @@ class _WebViewState extends State<_WebView> {
           initialData: _LoadingState.loading,
           builder: (context, snapshot) {
             final state = snapshot.data ?? _LoadingState.loading;
-            return _ErrorWidget(state: state, loading: widget.loading, error: widget.error, serverError: widget.serverError);
+            return _ErrorWidget(state: state, loading: widget.loading, error: widget.error, serverError: widget.serverError, backgroundColor: widget.backgroundColor);
           },
         ),
       ],
@@ -193,8 +198,9 @@ class _ErrorWidget extends StatelessWidget {
   final Widget? loading;
   final Widget? error;
   final Widget? serverError;
+  final Color? backgroundColor;
 
-  const _ErrorWidget({required this.state, this.loading, this.error, this.serverError});
+  const _ErrorWidget({required this.state, this.loading, this.error, this.serverError, this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
@@ -202,20 +208,41 @@ class _ErrorWidget extends StatelessWidget {
       case _LoadingState.loading:
         return SizedBox.expand(
           child: loading ?? Container(
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: backgroundColor ?? Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             alignment: Alignment.center,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(
-                    height: 35,
-                    width: 35,
-                    child: CircularProgressIndicator()
+                Image.asset('assets/payment_loading.gif', height: 120),
+                const SizedBox(height: 4),
+                Text(
+                  "Please wait...",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
                 ),
-                Text("Please wait, Loading the payment gateway..."),
+                const SizedBox(height: 8),
+                Text(
+                  "Loading the payment gateway",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.black54,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),
@@ -226,7 +253,7 @@ class _ErrorWidget extends StatelessWidget {
         return SizedBox.expand(
           child: error ?? Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: backgroundColor ?? Colors.white,
             ),
             alignment: Alignment.center,
             child: Column(
@@ -250,7 +277,7 @@ class _ErrorWidget extends StatelessWidget {
         return SizedBox.expand(
           child: serverError ?? Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: backgroundColor ?? Colors.white,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -397,6 +424,7 @@ Future<bool> showPaymentDialog({
   required String cancelledUrl,
   Widget? title,
   Color? appBarBackgroundColor,
+  Color? backgroundColor,
   Widget? loading,
   Widget? error,
   Widget? serverError,
@@ -420,6 +448,7 @@ Future<bool> showPaymentDialog({
       cancelledUrl: cancelledUrl,
       title: title,
       appBarBackgroundColor: appBarBackgroundColor,
+      backgroundColor: backgroundColor,
       loading: loading,
       error: error,
       serverError: serverError,
